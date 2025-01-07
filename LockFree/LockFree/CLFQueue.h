@@ -260,7 +260,7 @@ public:
 			}
 
 			// Head->next NULL인 경우는 큐가 비었을 때 뿐
-			if (next == NULL)
+			if (next == m_NULL)
 			{
 				continue;
 			}

@@ -12,7 +12,7 @@
 #include <queue>
 
 // 스레드 2개로 해야 분석이 편함
-#define THREAD_COUNT 2
+#define THREAD_COUNT 4
 #define TEST_LOOP_COUNT 100000
 #define ENQUEUE_DEQUEUE_COUNT 128
 
@@ -104,12 +104,12 @@ unsigned int stdQueueThreadFunc(LPVOID lpParam)
 class LargeBuffer
 {
 public:
-	BYTE buffer[1 * KB];
+	BYTE buffer[/*1 * KB*/80];
 };
 
 CTLSMemoryPoolManager<LargeBuffer, FALSE> lfMemoryPool = CTLSMemoryPoolManager<LargeBuffer, FALSE>();
 
-unsigned int LFMemoryPoolThreadFunc(LPVOID lpParam)
+unsigned int UseStackTLSPoolThreadFunc(LPVOID lpParam)
 {
 	for (int i = 0; i < TEST_LOOP_COUNT; i++)
 		// while (1)
@@ -137,7 +137,7 @@ unsigned int LFMemoryPoolThreadFunc(LPVOID lpParam)
 
 CTLSMemoryPoolManager<LargeBuffer, TRUE> tlsMemoryPool = CTLSMemoryPoolManager<LargeBuffer, TRUE>();
 
-unsigned int TLSMemoryPoolThreadFunc(LPVOID lpParam)
+unsigned int UseQueueTLSPoolThreadFunc(LPVOID lpParam)
 {
 	for (int i = 0; i < TEST_LOOP_COUNT; i++)
 		// while (1)
@@ -199,7 +199,7 @@ int main()
 	HANDLE arrTh[THREAD_COUNT];
 	for (int i = 0; i < THREAD_COUNT; i++)
 	{
-		arrTh[i] = (HANDLE)_beginthreadex(nullptr, 0, LFMemoryPoolThreadFunc, nullptr, CREATE_SUSPENDED, nullptr);
+		arrTh[i] = (HANDLE)_beginthreadex(nullptr, 0, UseStackTLSPoolThreadFunc, nullptr, CREATE_SUSPENDED, nullptr);
 		if (arrTh[i] == 0)
 			return 1;
 	}
@@ -213,7 +213,7 @@ int main()
 
 	for (int i = 0; i < THREAD_COUNT; i++)
 	{
-		arrTh[i] = (HANDLE)_beginthreadex(nullptr, 0, TLSMemoryPoolThreadFunc, nullptr, CREATE_SUSPENDED, nullptr);
+		arrTh[i] = (HANDLE)_beginthreadex(nullptr, 0, UseQueueTLSPoolThreadFunc, nullptr, CREATE_SUSPENDED, nullptr);
 		if (arrTh[i] == 0)
 			return 1;
 	}
